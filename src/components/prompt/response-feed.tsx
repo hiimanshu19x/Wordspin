@@ -10,16 +10,16 @@ import Link from 'next/link';
 
 interface ResponseFeedProps {
   responses: WritingResponse[];
-  sortBy?: 'newest' | 'shortest' | 'longest';
-  onSortChange?: (sort: 'newest' | 'shortest' | 'longest') => void;
+  sortBy?: 'newest' | 'shortest' | 'longest' | 'liked';
+  onSortChange?: (sort: 'newest' | 'shortest' | 'longest' | 'liked') => void;
   promptId?: string;
 }
 
 export function ResponseFeed({ responses, sortBy: controlledSortBy, onSortChange, promptId }: ResponseFeedProps) {
-  const [localSortBy, setLocalSortBy] = useState<'newest' | 'shortest' | 'longest'>('newest');
+  const [localSortBy, setLocalSortBy] = useState<'newest' | 'shortest' | 'longest' | 'liked'>('newest');
   const sortBy = controlledSortBy || localSortBy;
 
-  const handleSortChange = (sort: 'newest' | 'shortest' | 'longest') => {
+  const handleSortChange = (sort: 'newest' | 'shortest' | 'longest' | 'liked') => {
     if (onSortChange) {
       onSortChange(sort);
     } else {
@@ -36,6 +36,9 @@ export function ResponseFeed({ responses, sortBy: controlledSortBy, onSortChange
     }
     if (sortBy === 'longest') {
       return b.wordCount - a.wordCount;
+    }
+    if (sortBy === 'liked') {
+      return (b.reactions || 0) - (a.reactions || 0);
     }
     return 0;
   });
@@ -59,8 +62,8 @@ export function ResponseFeed({ responses, sortBy: controlledSortBy, onSortChange
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-center gap-2 mb-8">
-        {(['newest', 'shortest', 'longest'] as const).map((sort) => (
+      <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
+        {(['newest', 'liked', 'shortest', 'longest'] as const).map((sort) => (
           <Button
             key={sort}
             variant={sortBy === sort ? 'secondary' : 'ghost'}
@@ -68,7 +71,7 @@ export function ResponseFeed({ responses, sortBy: controlledSortBy, onSortChange
             onClick={() => handleSortChange(sort)}
             className="capitalize"
           >
-            {sort}
+            {sort === 'liked' ? 'Most liked' : sort}
           </Button>
         ))}
       </div>

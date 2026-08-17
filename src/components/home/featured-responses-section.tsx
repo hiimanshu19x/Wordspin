@@ -2,10 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { User, Clock } from 'lucide-react';
+import Link from 'next/link';
 import { AnimatedText } from '@/components/shared/animated-text';
 import { SectionWrapper } from '@/components/shared/section-wrapper';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { FEATURED_RESPONSES } from '@/lib/prompts';
 
 const containerVariants = {
@@ -54,49 +54,54 @@ export function FeaturedResponsesSection() {
         viewport={{ once: true, margin: '-80px' }}
       >
         {FEATURED_RESPONSES.map((response) => (
-          <motion.article
-            key={response.id}
-            variants={cardVariants}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="bg-card rounded-xl border border-border p-6 flex flex-col gap-4 cursor-pointer group"
-          >
-            <div className="space-y-2">
-              <Badge
-                variant="secondary"
-                className="font-normal text-[11px] tracking-wider uppercase"
-              >
-                {response.prompt.category}
-              </Badge>
-              <p className="font-serif italic text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                &ldquo;{response.prompt.text}&rdquo;
-              </p>
-            </div>
-
-            <div className="text-sm leading-relaxed text-foreground line-clamp-4 flex-grow">
-              {response.body}
-            </div>
-
-            <div className="pt-4 border-t border-border/60 flex justify-between items-center text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" />
-                <span>{response.author ?? 'Anonymous'}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span>{response.wordCount} words</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />~{response.readingTimeSeconds}s
-                </span>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-accent hover:text-accent/80 text-xs justify-center p-0 h-auto font-normal opacity-0 group-hover:opacity-100 transition-opacity"
+          <Link key={response.id} href={`/prompt/${response.promptId}`} className="group outline-none">
+            <motion.article
+              variants={cardVariants}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="bg-card rounded-xl border border-border p-6 flex flex-col gap-4 cursor-pointer h-full"
             >
-              Read full response →
-            </Button>
-          </motion.article>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="font-normal text-[11px] tracking-wider uppercase"
+                  >
+                    {response.prompt.category}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="font-normal text-[11px] tracking-wider uppercase"
+                  >
+                    Example
+                  </Badge>
+                </div>
+                <p className="font-serif italic text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                  &ldquo;{response.prompt.text}&rdquo;
+                </p>
+              </div>
+
+              <div className="text-sm leading-relaxed text-foreground line-clamp-4 flex-grow">
+                {response.body}
+              </div>
+
+              <div className="pt-4 border-t border-border/60 flex justify-between items-center text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5" />
+                  <span>{response.author ?? 'Anonymous'}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span>{response.wordCount} words</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />~{response.readingTimeSeconds}s
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-full text-accent group-hover:text-accent/80 text-xs flex justify-center p-0 h-auto font-normal opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                Read full response →
+              </div>
+            </motion.article>
+          </Link>
         ))}
       </motion.div>
     </SectionWrapper>

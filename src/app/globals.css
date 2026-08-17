@@ -190,3 +190,17 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Cross-browser scrollbar hiding */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Safe area padding */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

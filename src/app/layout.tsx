@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { newsreader, inter } from "@/lib/fonts";
-import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -19,8 +25,10 @@ export const metadata: Metadata = {
     "community",
     "anonymous writing",
   ],
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
+    url: SITE_URL,
     siteName: SITE_NAME,
     title: `${SITE_NAME} — Spin a Prompt, Write Your Truth`,
     description: SITE_DESCRIPTION,
@@ -32,7 +40,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": SITE_NAME,
+    "url": SITE_URL,
+    "description": SITE_DESCRIPTION,
+  };
+
   return (
     <html
       lang="en"
@@ -42,6 +58,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </body>
     </html>
   );

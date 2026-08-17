@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Prompt } from '@/lib/types'
@@ -12,6 +12,7 @@ interface SubmitDialogProps {
   prompt: Prompt
   body: string
   wordCount: number
+  initialAnonymous?: boolean
 }
 
 export function SubmitDialog({
@@ -20,10 +21,23 @@ export function SubmitDialog({
   onSubmit,
   prompt,
   body,
-  wordCount
+  wordCount,
+  initialAnonymous = true
 }: SubmitDialogProps) {
-  const [isAnonymous, setIsAnonymous] = useState(true)
+  const [isAnonymous, setIsAnonymous] = useState(initialAnonymous)
   const [authorName, setAuthorName] = useState('')
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleSubmit = () => {
     onSubmit(isAnonymous ? null : authorName)
@@ -34,12 +48,16 @@ export function SubmitDialog({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xl">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-xl"
+          onClick={onClose}
+        >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-card rounded-2xl border border-border p-6 md:p-8 max-w-lg w-full shadow-lg flex flex-col gap-6"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-card rounded-2xl border border-border p-6 md:p-8 max-w-lg w-full shadow-lg flex flex-col gap-6 overflow-y-auto max-h-[90vh]"
           >
             <h2 className="font-serif text-2xl">Ready to share?</h2>
             

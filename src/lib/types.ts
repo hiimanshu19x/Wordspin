@@ -17,6 +17,7 @@ export interface WritingResponse {
   readingTimeSeconds: number;
   reactions?: number;
   saved?: boolean;
+  isSeeded?: boolean;
 }
 
 export interface Draft {
@@ -31,4 +32,11 @@ export interface UserPreferences {
   authorName: string;
   preferAnonymous: boolean;
   seenPromptIds: string[];
+}
+
+export interface UserStats {
+  totalResponses: number;
+  currentStreak: number;
+  longestStreak: number;
+  responseDates: string[]; // ISO date strings (YYYY-MM-DD)
 }

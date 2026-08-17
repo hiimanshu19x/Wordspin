@@ -1,48 +1,44 @@
-'use client';
+import { getPromptById } from '@/lib/store';
+import { notFound } from 'next/navigation';
+import { SITE_URL, SITE_NAME } from '@/lib/constants';
+import type { Metadata } from 'next';
+import PromptPageClient from './prompt-page-client';
 
-import { use, useState } from 'react';
-import { PromptHero } from '@/components/prompt/prompt-hero';
-import { ResponseFeed } from '@/components/prompt/response-feed';
-import { useResponses, getPromptById } from '@/lib/store';
-import { SectionWrapper } from '@/components/shared/section-wrapper';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-
-export default function PromptPage({ params }: { params: Promise<{ promptId: string }> }) {
-  const { promptId } = use(params);
+export async function generateMetadata({ params }: { params: Promise<{ promptId: string }> }): Promise<Metadata> {
+  const { promptId } = await params;
   const prompt = getPromptById(promptId);
-  const { responses } = useResponses(promptId);
-  const [sortBy, setSortBy] = useState<'newest' | 'shortest' | 'longest'>('newest');
 
   if (!prompt) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center pt-20">
-        <div className="text-center space-y-4">
-          <h1 className="font-serif text-3xl">Prompt not found</h1>
-          <p className="text-muted-foreground">The prompt you are looking for does not exist.</p>
-          <Button asChild>
-            <Link href="/spin">Spin a Prompt</Link>
-          </Button>
-        </div>
-      </div>
-    );
+    return {
+      title: 'Prompt Not Found',
+    };
   }
 
-  return (
-    <div className="pt-20 pb-24">
-      <PromptHero 
-        prompt={prompt} 
-        responseCount={responses.length} 
-      />
-      
-      <SectionWrapper maxWidth="md" className="pt-8">
-        <ResponseFeed 
-          responses={responses} 
-          sortBy={sortBy} 
-          onSortChange={setSortBy} 
-          promptId={prompt.id}
-        />
-      </SectionWrapper>
-    </div>
-  );
+  const title = `Prompt: ${prompt.text.slice(0, 50)}${prompt.text.length > 50 ? '...' : ''}`;
+  const description = `Write your response to this ${prompt.category} prompt on ${SITE_NAME}.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      url: `${SITE_URL}/prompt/${promptId}`,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/prompt/${promptId}`,
+    },
+  };
+}
+
+export default async function PromptPage({ params }: { params: Promise<{ promptId: string }> }) {
+  const { promptId } = await params;
+  const prompt = getPromptById(promptId);
+
+  if (!prompt) {
+    notFound();
+  }
+
+  return <PromptPageClient promptId={promptId} />;
 }

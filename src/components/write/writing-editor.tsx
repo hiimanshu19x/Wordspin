@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Prompt } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { MAX_WORDS } from '@/lib/constants'
 
 interface WritingEditorProps {
   prompt: Prompt
@@ -63,7 +64,7 @@ export function WritingEditor({
         placeholder="Start writing..."
         className={cn(
           "w-full bg-transparent border-b-2 outline-none resize-none font-serif text-lg md:text-xl leading-relaxed text-foreground p-0 min-h-[300px] md:min-h-[400px] transition-colors",
-          wordCount > 200 ? "border-destructive" : "border-transparent focus:border-muted"
+          wordCount > MAX_WORDS ? "border-destructive" : "border-transparent focus:border-muted"
         )}
       />
     </div>

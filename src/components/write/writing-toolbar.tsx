@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { User, UserMinus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { MAX_WORDS } from '@/lib/constants'
 
 interface WritingToolbarProps {
   wordCount: number
@@ -17,7 +18,7 @@ interface WritingToolbarProps {
 
 export function WritingToolbar({
   wordCount,
-  maxWords = 200,
+  maxWords = MAX_WORDS,
   isAnonymous,
   onToggleAnonymous,
   onSubmit,
@@ -32,7 +33,7 @@ export function WritingToolbar({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border px-4 py-3 z-30">
+    <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] z-30">
       <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
           <div className={cn("text-sm font-medium transition-colors", getWordCountColor())}>

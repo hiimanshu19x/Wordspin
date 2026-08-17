@@ -1,12 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { AnimatedText } from '@/components/shared/animated-text';
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronDown } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { PromptCard } from '@/components/shared/prompt-card';
+import { SAMPLE_PROMPTS } from '@/lib/prompts';
 
 export function HeroSection() {
+  const router = useRouter();
+  const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+
+  const handleSpin = () => {
+    setCurrentPromptIndex((prev) => (prev + 1) % SAMPLE_PROMPTS.length);
+  };
+
+  const handleWrite = () => {
+    router.push(`/write/${SAMPLE_PROMPTS[currentPromptIndex].id}`);
+  };
+
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden pt-16">
       {/* Ambient background decoration */}
@@ -39,16 +52,25 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-4 text-center">
-        <AnimatedText
-          as="h1"
-          text="Spin a prompt. Write your truth."
-          className="font-serif text-4xl font-light tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
-          animation="fade-up"
-        />
+        <div className="flex flex-col gap-2">
+          <AnimatedText
+            as="h1"
+            text="One question."
+            className="font-serif text-4xl font-light tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
+            animation="fade-up"
+          />
+          <AnimatedText
+            as="h1"
+            text="Thousands of perspectives."
+            className="font-serif text-4xl font-light tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
+            animation="fade-up"
+            delay={0.1}
+          />
+        </div>
         
         <div className="mt-6 flex justify-center">
           <AnimatedText
-            text="Receive a random writing prompt. Respond in 200 words or less. Then discover how others saw the same world."
+            text="Spin a writing prompt. Answer in 200 words. Discover how others saw the same world."
             className="max-w-xl text-center text-lg leading-relaxed text-muted-foreground md:text-xl"
             delay={0.3}
           />
@@ -58,17 +80,13 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+          className="mt-12 w-full max-w-2xl"
         >
-          <Button size="lg" className="gap-2" asChild>
-            <Link href="/spin">
-              <Sparkles className="h-5 w-5" />
-              Spin a Prompt
-            </Link>
-          </Button>
-          <Button size="lg" variant="ghost" asChild>
-            <a href="#how-it-works">See How It Works</a>
-          </Button>
+          <PromptCard 
+            prompt={SAMPLE_PROMPTS[currentPromptIndex]}
+            onSpin={handleSpin}
+            onWrite={handleWrite}
+          />
         </motion.div>
       </div>
 

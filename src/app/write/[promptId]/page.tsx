@@ -1,10 +1,8 @@
 'use client';
 
-import { use, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { use, useState, useEffect } from 'react';
+import { useRouter, notFound } from 'next/navigation';
 import { useDraft, useResponses, getPromptById, usePreferences } from '@/lib/store';
-import { Button } from '@/components/ui/button';
 import { WritingEditor } from '@/components/write/writing-editor';
 import { WritingToolbar } from '@/components/write/writing-toolbar';
 import { SubmitDialog } from '@/components/write/submit-dialog';
@@ -15,6 +13,10 @@ export default function WritePage({ params }: { params: Promise<{ promptId: stri
   const { promptId } = use(params);
   const router = useRouter();
   const prompt = getPromptById(promptId);
+  
+  if (!prompt) {
+    notFound();
+  }
   
   const { draft, saveDraft, clearDraft } = useDraft(promptId);
   const { addResponse } = useResponses(promptId);
@@ -42,18 +44,6 @@ export default function WritePage({ params }: { params: Promise<{ promptId: stri
     
     return () => clearTimeout(timer);
   }, [body, draft?.body, saveDraft]);
-
-  if (!prompt) {
-    return (
-      <div className="pt-32 px-4 max-w-md mx-auto text-center flex flex-col gap-6">
-        <h1 className="font-serif text-2xl">Prompt not found</h1>
-        <p className="text-muted-foreground">This prompt might have expired or doesn&apos;t exist.</p>
-        <Button asChild>
-          <Link href="/spin">Spin a new prompt</Link>
-        </Button>
-      </div>
-    );
-  }
 
   const handleBodyChange = (newBody: string) => {
     setBody(newBody);

@@ -10,7 +10,10 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ categories, selected, onSelect }: CategoryFilterProps) {
   return (
-    <div className="flex w-full overflow-x-auto pb-4 gap-2 scrollbar-none items-center justify-start sm:flex-wrap">
+    <div 
+      className="flex w-full overflow-x-auto pb-4 gap-2 scrollbar-none items-center justify-start sm:flex-wrap"
+      style={{ scrollbarWidth: 'none' }}
+    >
       <Badge
         variant={selected === null ? 'default' : 'outline'}
         className="cursor-pointer whitespace-nowrap transition-colors py-2"

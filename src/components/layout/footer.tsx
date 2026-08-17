@@ -32,7 +32,7 @@ export function Footer() {
           </div>
 
           <div className="text-sm text-muted-foreground/60 pt-8 w-full border-t border-border/50">
-            © 2026 {SITE_NAME}. All rights reserved.
+            © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </div>
 
         </div>

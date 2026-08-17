@@ -1,9 +1,9 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, useMemo } from "react";
-import type { Prompt, WritingResponse, Draft, UserPreferences } from "./types";
+import type { Prompt, WritingResponse, Draft, UserPreferences, UserStats } from "./types";
 import { SAMPLE_PROMPTS, FEATURED_RESPONSES } from "./prompts";
-import { PROMPT_CATEGORIES, type PromptCategory } from "./constants";
+import { PROMPT_CATEGORIES, MAX_WORDS, type PromptCategory } from "./constants";
 
 // ─── Storage Keys ──────────────────────────────
 const KEYS = {
@@ -11,6 +11,9 @@ const KEYS = {
   DRAFTS: "wordspin:drafts",
   PREFERENCES: "wordspin:preferences",
   SEEN_PROMPTS: "wordspin:seen",
+  REACTIONS: "wordspin:reactions",
+  SAVED_PROMPTS: "wordspin:saved-prompts",
+  STATS: "wordspin:stats",
 } as const;
 
 // ─── Storage Helpers ───────────────────────────
@@ -27,8 +30,6 @@ function getItem<T>(key: string, fallback: T): T {
 function setItem<T>(key: string, value: T): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(key, JSON.stringify(value));
-  // Notify all subscribers
-  window.dispatchEvent(new StorageEvent("storage", { key }));
 }
 
 // ─── External Store for Reactivity ─────────────
@@ -37,16 +38,8 @@ const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-
-  const handleStorage = () => {
-    storeVersion++;
-    listener();
-  };
-
-  window.addEventListener("storage", handleStorage);
   return () => {
     listeners.delete(listener);
-    window.removeEventListener("storage", handleStorage);
   };
 }
 
@@ -68,11 +61,13 @@ function ensureSeeded() {
   if (typeof window === "undefined") return;
   const existing = localStorage.getItem(KEYS.RESPONSES);
   if (!existing) {
-    setItem(KEYS.RESPONSES, FEATURED_RESPONSES);
+    const seeded = FEATURED_RESPONSES.map((r) => ({ ...r, isSeeded: true }));
+    setItem(KEYS.RESPONSES, seeded);
+    notifyAll();
   }
 }
 
-// ─── All Prompts (static + deterministic daily) ─
+// ─── All Prompts (static) ──────────────────────
 export function getAllPrompts(): Prompt[] {
   return SAMPLE_PROMPTS;
 }
@@ -103,11 +98,43 @@ export function useResponses(promptId?: string) {
         ...response,
         id: `r-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         createdAt: new Date().toISOString(),
-        readingTimeSeconds: Math.max(10, Math.round((response.wordCount / 200) * 60)),
+        readingTimeSeconds: Math.max(10, Math.round((response.wordCount / MAX_WORDS) * 60)),
         reactions: 0,
         saved: false,
+        isSeeded: false,
       };
       setItem(KEYS.RESPONSES, [newResponse, ...all]);
+
+      // Track stat
+      const today = new Date().toISOString().slice(0, 10);
+      const stats = getItem<UserStats>(KEYS.STATS, {
+        totalResponses: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        responseDates: [],
+      });
+      stats.totalResponses += 1;
+      if (!stats.responseDates.includes(today)) {
+        stats.responseDates.push(today);
+        stats.responseDates.sort();
+      }
+      // Recompute streak
+      const dates = stats.responseDates.sort().reverse();
+      let streak = 1;
+      for (let i = 0; i < dates.length - 1; i++) {
+        const curr = new Date(dates[i]);
+        const prev = new Date(dates[i + 1]);
+        const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays <= 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      stats.currentStreak = streak;
+      stats.longestStreak = Math.max(stats.longestStreak, streak);
+      setItem(KEYS.STATS, stats);
+
       notifyAll();
       return newResponse;
     },
@@ -127,7 +154,7 @@ export function usePrompts(category?: PromptCategory) {
   const getRandomPrompt = useCallback(
     (excludeIds: string[] = []) => {
       const available = prompts.filter((p) => !excludeIds.includes(p.id));
-      if (available.length === 0) return prompts[0]; // cycle back
+      if (available.length === 0) return prompts[0];
       return available[Math.floor(Math.random() * available.length)];
     },
     [prompts]
@@ -195,7 +222,6 @@ export function usePreferences() {
 export function useDailyPrompt() {
   const allPrompts = getAllPrompts();
 
-  // Deterministic daily prompt based on date
   const today = new Date();
   const dayIndex =
     (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) %
@@ -203,7 +229,6 @@ export function useDailyPrompt() {
 
   const todayPrompt = allPrompts[dayIndex];
 
-  // Past daily prompts (last 7 days)
   const pastPrompts = useMemo(() => {
     const result: { date: string; prompt: Prompt }[] = [];
     for (let i = 1; i <= 7; i++) {
@@ -222,8 +247,8 @@ export function useDailyPrompt() {
       });
     }
     return result;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today.toDateString()]);
 
   return { todayPrompt, pastPrompts };
 }
@@ -233,4 +258,68 @@ export function useResponseCount(promptId: string): number {
   useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const responses = getItem<WritingResponse[]>(KEYS.RESPONSES, []);
   return responses.filter((r) => r.promptId === promptId).length;
+}
+
+// ─── Hook: useReactions ────────────────────────
+export function useReactions() {
+  useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const likedIds = getItem<string[]>(KEYS.REACTIONS, []);
+
+  const isLiked = useCallback(
+    (responseId: string) => likedIds.includes(responseId),
+    [likedIds]
+  );
+
+  const toggleReaction = useCallback((responseId: string) => {
+    const current = getItem<string[]>(KEYS.REACTIONS, []);
+    const newLiked = current.includes(responseId)
+      ? current.filter((id) => id !== responseId)
+      : [...current, responseId];
+    setItem(KEYS.REACTIONS, newLiked);
+    notifyAll();
+  }, []);
+
+  return { likedIds, isLiked, toggleReaction };
+}
+
+// ─── Hook: useSavedPrompts ─────────────────────
+export function useSavedPrompts() {
+  useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const savedIds = getItem<string[]>(KEYS.SAVED_PROMPTS, []);
+
+  const isSaved = useCallback(
+    (promptId: string) => savedIds.includes(promptId),
+    [savedIds]
+  );
+
+  const toggleSave = useCallback((promptId: string) => {
+    const current = getItem<string[]>(KEYS.SAVED_PROMPTS, []);
+    const updated = current.includes(promptId)
+      ? current.filter((id) => id !== promptId)
+      : [...current, promptId];
+    setItem(KEYS.SAVED_PROMPTS, updated);
+    notifyAll();
+  }, []);
+
+  const savedPrompts = useMemo(() => {
+    return savedIds
+      .map((id) => SAMPLE_PROMPTS.find((p) => p.id === id))
+      .filter(Boolean) as Prompt[];
+  }, [savedIds]);
+
+  return { savedIds, savedPrompts, isSaved, toggleSave };
+}
+
+// ─── Hook: useUserStats ────────────────────────
+export function useUserStats(): UserStats {
+  useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  return getItem<UserStats>(KEYS.STATS, {
+    totalResponses: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    responseDates: [],
+  });
 }
