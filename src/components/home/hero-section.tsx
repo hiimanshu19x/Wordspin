@@ -52,21 +52,31 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-4 text-center">
-        {/* Headline */}
+        {/* Headline — editorial display typography */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center gap-1"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center"
         >
-          <h1 className="font-serif text-5xl font-light tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+          {/* Line 1: The setup — upright, measured, slightly muted */}
+          <h1
+            className="font-serif font-normal tracking-tight leading-none text-foreground/80
+                       text-4xl sm:text-5xl md:text-6xl"
+          >
             One question.
           </h1>
-          <h2 className="font-serif text-4xl font-light italic tracking-tight text-accent sm:text-5xl md:text-6xl lg:text-7xl whitespace-nowrap">
+
+          {/* Line 2: The payoff — italic, accent, larger, pulls the eye */}
+          <h2
+            className="font-serif font-light italic tracking-tight leading-[1.08] text-accent
+                       mt-1 sm:mt-2
+                       text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+          >
             Thousands of perspectives.
           </h2>
         </motion.div>
-        
+
         <div className="mt-6 flex justify-center">
           <AnimatedText
             text="Spin a writing prompt. Answer in 200 words. Discover how others saw the same world."
