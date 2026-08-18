@@ -52,21 +52,20 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-4 text-center">
-        <div className="flex flex-col gap-2">
-          <AnimatedText
-            as="h1"
-            text="One question."
-            className="font-serif text-4xl font-light tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
-            animation="fade-up"
-          />
-          <AnimatedText
-            as="h1"
-            text="Thousands of perspectives."
-            className="font-serif text-4xl font-light tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
-            animation="fade-up"
-            delay={0.1}
-          />
-        </div>
+        {/* Headline */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-1"
+        >
+          <h1 className="font-serif text-5xl font-light tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+            One question.
+          </h1>
+          <h2 className="font-serif text-4xl font-light italic tracking-tight text-accent sm:text-5xl md:text-6xl lg:text-7xl whitespace-nowrap">
+            Thousands of perspectives.
+          </h2>
+        </motion.div>
         
         <div className="mt-6 flex justify-center">
           <AnimatedText

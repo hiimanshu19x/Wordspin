@@ -79,7 +79,15 @@ export function getPromptById(id: string): Prompt | undefined {
 // ─── Hook: useResponses ────────────────────────
 export function useResponses(promptId?: string) {
   useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  ensureSeeded();
+
+  // Seed on first client mount — NOT in render body
+  if (typeof window !== "undefined") {
+    const existing = localStorage.getItem(KEYS.RESPONSES);
+    if (!existing) {
+      const seeded = FEATURED_RESPONSES.map((r) => ({ ...r, isSeeded: true }));
+      setItem(KEYS.RESPONSES, seeded);
+    }
+  }
 
   const responses = getItem<WritingResponse[]>(KEYS.RESPONSES, []);
 
