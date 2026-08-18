@@ -4,9 +4,10 @@ const DESTINATION_EMAIL = 'truthtadka@gmail.com';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, topic, message } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { name, email, topic, message } = body;
 
-    if (!message || typeof message !== 'string') {
+    if (!message || typeof message !== 'string' || !message.trim()) {
       return NextResponse.json(
         { error: 'Message content is required.' },
         { status: 400 }
@@ -20,39 +21,51 @@ export async function POST(request: Request) {
     };
 
     const topicTitle = topicLabels[topic] || 'Contact Note';
+    const senderName = name?.trim() || 'Anonymous User';
+    const senderEmail = email?.trim() || 'no-reply@wordspin.app';
 
-    // Forward to secure email delivery
+    // Prepare encoded payload for reliable email dispatch
+    const formData = new URLSearchParams();
+    formData.append('name', senderName);
+    formData.append('email', senderEmail);
+    formData.append('topic', topicTitle);
+    formData.append('message', message.trim());
+    formData.append('_subject', `Wordspin: [${topicTitle}] from ${senderName}`);
+    formData.append('_template', 'box');
+    formData.append('_captcha', 'false');
+
     const response = await fetch(`https://formsubmit.co/ajax/${DESTINATION_EMAIL}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
-        Origin: 'https://wordspin.vercel.app',
         Referer: 'https://wordspin.vercel.app/contact',
+        Origin: 'https://wordspin.vercel.app',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       },
-      body: JSON.stringify({
-        name: name || 'Anonymous User',
-        email: email || 'no-reply@wordspin.app',
-        topic: topicTitle,
-        message,
-        _subject: `Wordspin: ${topicTitle} from ${name || 'Anonymous'}`,
-        _template: 'box',
-        _captcha: 'false',
-      }),
+      body: formData.toString(),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
-    if (data.success === 'true' || data.success === true || response.ok) {
+    if (response.ok && (data?.success === 'true' || data?.success === true)) {
       return NextResponse.json({ success: true });
     }
 
-    // Even if initial activation is pending, acknowledge receipt
-    return NextResponse.json({ success: true, pendingActivation: true });
-  } catch (error) {
-    console.error('Failed to submit contact form:', error);
+    // Fallback if response was successful
+    if (response.ok) {
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json(
-      { error: 'Failed to send message. Please try again later.' },
+      { error: data?.message || 'Failed to deliver message. Please try again.' },
+      { status: 500 }
+    );
+  } catch (error) {
+    console.error('Contact API Error:', error);
+    return NextResponse.json(
+      { error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }
     );
   }
