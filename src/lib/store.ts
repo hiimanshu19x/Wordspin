@@ -10,7 +10,6 @@ const KEYS = {
   RESPONSES: "wordspin:responses",
   DRAFTS: "wordspin:drafts",
   PREFERENCES: "wordspin:preferences",
-  SEEN_PROMPTS: "wordspin:seen",
   REACTIONS: "wordspin:reactions",
   SAVED_PROMPTS: "wordspin:saved-prompts",
   STATS: "wordspin:stats",
@@ -56,14 +55,17 @@ function getServerSnapshot() {
   return 0;
 }
 
-// ─── Seed Data ─────────────────────────────────
-function ensureSeeded() {
-  if (typeof window === "undefined") return;
-  const existing = localStorage.getItem(KEYS.RESPONSES);
-  if (!existing) {
-    const seeded = FEATURED_RESPONSES.map((r) => ({ ...r, isSeeded: true }));
-    setItem(KEYS.RESPONSES, seeded);
-    notifyAll();
+// ─── One-time seed at module load (client only) ─
+// This runs exactly once when this module is first imported in the browser.
+// It is NOT inside any component, so it never conflicts with React rendering.
+if (typeof window !== "undefined") {
+  try {
+    if (!localStorage.getItem(KEYS.RESPONSES)) {
+      const seeded = FEATURED_RESPONSES.map((r) => ({ ...r, isSeeded: true }));
+      localStorage.setItem(KEYS.RESPONSES, JSON.stringify(seeded));
+    }
+  } catch {
+    // localStorage may be unavailable (private mode, etc.) — silently ignore
   }
 }
 
@@ -79,15 +81,6 @@ export function getPromptById(id: string): Prompt | undefined {
 // ─── Hook: useResponses ────────────────────────
 export function useResponses(promptId?: string) {
   useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  // Seed on first client mount — NOT in render body
-  if (typeof window !== "undefined") {
-    const existing = localStorage.getItem(KEYS.RESPONSES);
-    if (!existing) {
-      const seeded = FEATURED_RESPONSES.map((r) => ({ ...r, isSeeded: true }));
-      setItem(KEYS.RESPONSES, seeded);
-    }
-  }
 
   const responses = getItem<WritingResponse[]>(KEYS.RESPONSES, []);
 
@@ -113,7 +106,7 @@ export function useResponses(promptId?: string) {
       };
       setItem(KEYS.RESPONSES, [newResponse, ...all]);
 
-      // Track stat
+      // Update stats
       const today = new Date().toISOString().slice(0, 10);
       const stats = getItem<UserStats>(KEYS.STATS, {
         totalResponses: 0,
@@ -126,18 +119,14 @@ export function useResponses(promptId?: string) {
         stats.responseDates.push(today);
         stats.responseDates.sort();
       }
-      // Recompute streak
-      const dates = stats.responseDates.sort().reverse();
+      const dates = [...stats.responseDates].sort().reverse();
       let streak = 1;
       for (let i = 0; i < dates.length - 1; i++) {
         const curr = new Date(dates[i]);
         const prev = new Date(dates[i + 1]);
         const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
-        if (diffDays <= 1) {
-          streak++;
-        } else {
-          break;
-        }
+        if (diffDays <= 1) streak++;
+        else break;
       }
       stats.currentStreak = streak;
       stats.longestStreak = Math.max(stats.longestStreak, streak);

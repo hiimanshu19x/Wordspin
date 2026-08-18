@@ -42,7 +42,7 @@ export default function DailyPageClient() {
       <SectionWrapper maxWidth="md" className="mt-16">
         <h3 className="font-serif text-xl mb-6">Previous Days</h3>
         <div className="flex flex-col">
-          {pastPrompts.slice(0, 7).map(({ date, prompt }, index) => (
+          {pastPrompts.slice(0, 7).map(({ date, prompt }: { date: string; prompt: { id: string; text: string; category: string } }, index: number) => (
             <motion.div
               key={prompt.id + date}
               initial={{ opacity: 0, y: 10 }}

@@ -49,7 +49,7 @@ export function SavedPageClient() {
             }
           }}
         >
-          {savedPrompts.map((prompt) => (
+          {savedPrompts.map((prompt: import('@/lib/types').Prompt) => (
             <motion.div 
               key={prompt.id}
               variants={{

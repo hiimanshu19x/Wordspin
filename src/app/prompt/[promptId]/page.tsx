@@ -1,4 +1,4 @@
-import { getPromptById } from '@/lib/store';
+import { getPromptById } from '@/lib/prompts-data';
 import { notFound } from 'next/navigation';
 import { SITE_URL, SITE_NAME } from '@/lib/constants';
 import type { Metadata } from 'next';
