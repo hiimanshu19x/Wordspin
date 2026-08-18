@@ -52,27 +52,19 @@ export function HeroSection() {
       </div>
 
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-4 text-center">
-        {/* Headline — editorial display typography */}
+        {/* Headline */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center"
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-1"
         >
-          {/* Line 1: The setup — upright, measured, slightly muted */}
-          <h1
-            className="font-serif font-normal tracking-tight leading-none text-foreground/80
-                       text-4xl sm:text-5xl md:text-6xl"
-          >
+          <h1 className="font-serif font-normal tracking-tight leading-tight text-foreground
+                         text-4xl sm:text-5xl md:text-5xl lg:text-6xl">
             One question.
           </h1>
-
-          {/* Line 2: The payoff — italic, accent, larger, pulls the eye */}
-          <h2
-            className="font-serif font-light italic tracking-tight leading-[1.08] text-accent
-                       mt-1 sm:mt-2
-                       text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
-          >
+          <h2 className="font-serif font-light italic tracking-tight leading-tight text-accent
+                         text-4xl sm:text-5xl md:text-5xl lg:text-6xl lg:whitespace-nowrap">
             Thousands of perspectives.
           </h2>
         </motion.div>
