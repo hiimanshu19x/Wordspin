@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -33,15 +32,12 @@ export function Header() {
             : 'bg-transparent border-transparent'
         )}
       >
-        <Link href="/" className="flex items-center" aria-label="Wordspin home">
-          <Image
-            src="/logo.png"
-            alt="Wordspin"
-            width={140}
-            height={44}
-            className="h-9 w-auto object-contain"
-            priority
-          />
+        <Link
+          href="/"
+          className="font-celesse text-2xl md:text-3xl font-medium tracking-tight text-foreground hover:text-accent transition-colors"
+          aria-label="Wordspin home"
+        >
+          Wordspin
         </Link>
 
         {/* Desktop Nav */}

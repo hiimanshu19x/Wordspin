@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { newsreader, inter } from "@/lib/fonts";
+import { newsreader, inter, celesse } from "@/lib/fonts";
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/lib/constants";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${inter.variable} h-full`}
+      className={`${newsreader.variable} ${inter.variable} ${celesse.variable} h-full`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <Header />
