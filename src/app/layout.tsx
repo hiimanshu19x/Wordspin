@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.png", type: "image/png" },
     ],
     shortcut: ["/favicon.ico"],
@@ -67,6 +67,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${newsreader.variable} ${inter.variable} ${celesse.variable} h-full`}
     >
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <Header />
         <main className="flex-1">{children}</main>
