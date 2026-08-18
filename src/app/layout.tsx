@@ -26,17 +26,27 @@ export const metadata: Metadata = {
     "anonymous writing",
   ],
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+  },
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: SITE_NAME,
     title: `${SITE_NAME} — Spin a Prompt, Write Your Truth`,
     description: SITE_DESCRIPTION,
+    images: [{ url: "/logo.png", width: 1024, height: 1024, alt: "Wordspin" }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_NAME} — Spin a Prompt, Write Your Truth`,
     description: SITE_DESCRIPTION,
+    images: ["/logo.png"],
   },
 };
 

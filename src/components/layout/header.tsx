@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { SITE_NAME, NAV_LINKS } from '@/lib/constants';
+import { NAV_LINKS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { MobileNav } from './mobile-nav';
 
@@ -32,8 +33,15 @@ export function Header() {
             : 'bg-transparent border-transparent'
         )}
       >
-        <Link href="/" className="font-editorial font-serif text-xl font-medium tracking-tight">
-          {SITE_NAME}
+        <Link href="/" className="flex items-center" aria-label="Wordspin home">
+          <Image
+            src="/logo.png"
+            alt="Wordspin"
+            width={140}
+            height={44}
+            className="h-9 w-auto object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
