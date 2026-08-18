@@ -32,7 +32,7 @@ export function Footer() {
           </div>
 
           <div className="text-sm text-muted-foreground/70 pt-8 w-full border-t border-border/50">
-            made by Himanshu Singh
+            Made with 🌻 by Himanshu Singh
           </div>
 
         </div>
