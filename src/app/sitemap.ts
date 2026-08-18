@@ -3,7 +3,17 @@ import { SAMPLE_PROMPTS } from '@/lib/prompts';
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ['/', '/spin', '/explore', '/daily', '/saved'].map((route) => ({
+  const staticRoutes = [
+    '/',
+    '/spin',
+    '/explore',
+    '/daily',
+    '/saved',
+    '/about',
+    '/privacy',
+    '/terms',
+    '/contact',
+  ].map((route) => ({
     url: `${SITE_URL}${route}`,
     lastModified: new Date().toISOString(),
   }));

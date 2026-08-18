@@ -11,28 +11,28 @@ export function Footer() {
             <h2 className="font-editorial font-serif text-2xl font-medium tracking-tight text-foreground">
               {SITE_NAME}
             </h2>
-            <p className="text-muted-foreground">
-              Where every perspective matters.
+            <p className="text-muted-foreground text-sm">
+              One question. Thousands of perspectives.
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/about" className="hover:text-foreground transition-colors">
               About
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
               Terms
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/contact" className="hover:text-foreground transition-colors">
               Contact
             </Link>
           </div>
 
-          <div className="text-sm text-muted-foreground/60 pt-8 w-full border-t border-border/50">
-            © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+          <div className="text-sm text-muted-foreground/70 pt-8 w-full border-t border-border/50">
+            made by Himanshu Singh
           </div>
 
         </div>
