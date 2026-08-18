@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function ContactForm() {
@@ -12,23 +12,48 @@ export function ContactForm() {
   const [message, setMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
-    // Simulate brief processing
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          topic,
+          message: message.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setIsSubmitted(true);
+      } else {
+        setErrorMessage(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setErrorMessage('Network error. Please check your connection and try again.');
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 600);
+    }
   };
 
   const handleReset = () => {
     setName('');
     setEmail('');
     setMessage('');
+    setErrorMessage(null);
     setIsSubmitted(false);
   };
 
@@ -47,7 +72,7 @@ export function ContactForm() {
           </div>
           <h3 className="font-serif text-2xl font-medium text-foreground">Message received</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Thank you for reaching out! Himanshu Singh has received your feedback and will review it shortly.
+            Thank you for reaching out! Your note has been received and will be reviewed shortly.
           </p>
           <div className="pt-4">
             <Button variant="outline" size="sm" onClick={handleReset}>
@@ -64,6 +89,13 @@ export function ContactForm() {
           onSubmit={handleSubmit}
           className="space-y-6"
         >
+          {errorMessage && (
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label htmlFor="name" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
